@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import java.io.File;
 import app.workers.DbWorkerItf;
+import app.workers.PersonneManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -32,7 +33,8 @@ public class MainCtrl implements Initializable {
 
   // DB par défaut
   final static private TypesDB DB_TYPE = TypesDB.MYSQL;
-
+  
+  private PersonneManager manPers;
   private DbWorkerItf dbWrk;
   private boolean modeAjout;
 
@@ -75,13 +77,14 @@ public class MainCtrl implements Initializable {
   @Override
   public void initialize(URL url, ResourceBundle rb) {
     dbWrk = new DbWorker();
+    manPers = new PersonneManager();
     ouvrirDB();
   }
 
   @FXML
   public void actionPrevious(ActionEvent event) {
     try {
-      afficherPersonne(dbWrk.precedentPersonne());
+      afficherPersonne(manPers.precedentPersonne());
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
     }
@@ -90,7 +93,7 @@ public class MainCtrl implements Initializable {
   @FXML
   public void actionNext(ActionEvent event) {
     try {
-      afficherPersonne(dbWrk.suivantPersonne());
+      afficherPersonne(manPers.suivantPersonne());
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
     }
@@ -166,7 +169,7 @@ public class MainCtrl implements Initializable {
           System.out.println("Base de données pas définie");
       }
       System.out.println("------- DB OK ----------");
-      afficherPersonne(dbWrk.precedentPersonne());
+      afficherPersonne(manPers.precedentPersonne());
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
       System.exit(1);
