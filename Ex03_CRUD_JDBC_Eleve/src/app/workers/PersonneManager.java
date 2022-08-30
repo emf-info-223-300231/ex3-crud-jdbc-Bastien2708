@@ -5,6 +5,8 @@
 package app.workers;
 
 import app.beans.Personne;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,26 +17,32 @@ public class PersonneManager {
 
     private int index = 0;
     private List<Personne> listePersonnes;
-    
-    public PersonneManager() {
 
+    public PersonneManager() {
+      listePersonnes = new ArrayList<>();
     }
-    public Personne courantPersonne(){
-        
+
+    public Personne courantPersonne() {
+        return !listePersonnes.isEmpty() ? listePersonnes.get(index) : null;
     }
-    public Personne debutPersonne(){
-        
+
+    public Personne debutPersonne() {
+        return listePersonnes.get(index = 0);
     }
-    public Personne finPersonne(){
-        
+
+    public Personne finPersonne() {
+        return listePersonnes.get(index = listePersonnes.size()-1);
     }
-    public Personne precedentPersonne(){
-        
+
+    public Personne precedentPersonne() {
+        return !listePersonnes.isEmpty() ? listePersonnes.get(index > 0 ? --index : index) : null;
     }
-    public Personne setPersonne(List<Personne> listPersonne){
-        
+
+    public void setPersonne(List<Personne> listPersonne) {
+        this.listePersonnes = listPersonne;
     }
-    public Personne suivantPersonne(){
-        
+
+    public Personne suivantPersonne() {
+        return listePersonnes.get(index < listePersonnes.size()-1 ? ++index : index);
     }
 }

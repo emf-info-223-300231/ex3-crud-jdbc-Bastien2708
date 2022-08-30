@@ -73,12 +73,21 @@ public class DbWorker implements DbWorkerItf {
        ArrayList<Personne> listePersonnes = new ArrayList<>();
         try {
             Statement st = dbConnexion.createStatement();
-            ResultSet rs = st.executeQuery("select PK_PERS, Prenom, Nom, Date_naissance, No_rue, Rue, NPA, Ville, Actif, Salaire, date_modif, no_modif from t_personne");
+            ResultSet rs = st.executeQuery("select PK_PERS, Prenom, Nom, Date_naissance, No_rue, Rue, NPA, Ville, Actif, Salaire, date_modif from t_personne");
             while (rs.next()) {
-                String nom = rs.getString("NOM");
-                String prenom = rs.getString(2);
-                int pk = rs.getInt("PK_PERS");
-                listePersonnes.add(new Personne(nom, prenom));
+                int pk_pers = rs.getInt("PK_PERS");
+                String nom = rs.getString("Nom");
+                String prenom = rs.getString("Prenom");
+                Date date_naissance = rs.getDate("Date_naissance");
+                int no_rue = rs.getInt("No_rue");
+                String rue = rs.getString("Rue");
+                int npa = rs.getInt("NPA");
+                String ville = rs.getString("Ville");
+                boolean actif = rs.getByte("Actif") == 1;
+                double salaire = rs.getDouble("Salaire");
+                java.util.Date date_modif = new java.util.Date(rs.getDate("date_modif").getTime());
+                
+                listePersonnes.add(new Personne(pk_pers, nom, prenom, date_naissance, no_rue, rue, npa, ville, actif, salaire, date_modif));
             }
         } catch (SQLException ex) {
         }
@@ -86,6 +95,7 @@ public class DbWorker implements DbWorkerItf {
     }
     @Override
     public void creer(Personne personne) throws MyDBException {
+        
     }
 
     @Override
@@ -97,7 +107,8 @@ public class DbWorker implements DbWorkerItf {
     }
 
     @Override
-    public Personne lire(int lire) throws MyDBException {
+    public Personne lire(int PK) throws MyDBException {
+        return null;
     }
 
 }
