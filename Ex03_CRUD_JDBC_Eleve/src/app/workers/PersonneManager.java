@@ -23,7 +23,13 @@ public class PersonneManager {
     }
 
     public Personne courantPersonne() {
-        return !listePersonnes.isEmpty() ? listePersonnes.get(index) : null;
+        if(listePersonnes == null || listePersonnes.isEmpty()){
+            return null;
+        }
+        if(index >= listePersonnes.size()){
+            index = listePersonnes.size() -1;
+        }
+        return listePersonnes.get(index);
     }
 
     public Personne debutPersonne() {

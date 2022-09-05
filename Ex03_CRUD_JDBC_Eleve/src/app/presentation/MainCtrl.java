@@ -3,6 +3,7 @@ package app.presentation;
 import app.beans.Personne;
 import app.exceptions.MyDBException;
 import app.helpers.JfxPopup;
+import app.helpers.SystemLib;
 import app.workers.DbWorker;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -18,11 +19,14 @@ import app.workers.DbWorkerItf;
 import app.workers.PersonneManager;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.util.converter.LocalDateTimeStringConverter;
 
 /**
  *
@@ -121,16 +125,29 @@ public class MainCtrl implements Initializable {
 
     @FXML
     private void menuAjouter(ActionEvent event) {
+        rendreVisibleBoutonsDepl(false);
         effacerContenuChamps();
+        modeAjout = true;
     }
 
     @FXML
     private void menuModifier(ActionEvent event) {
+        rendreVisibleBoutonsDepl(false);
+        modeAjout = false;
     }
 
     @FXML
     private void menuEffacer(ActionEvent event) {
-        effacerContenuChamps();
+        try {
+            dbWrk.effacer(manPers.courantPersonne());
+            btnAnnuler.setVisible(true);
+            btnSauver.setVisible(true);
+            manPers.setPersonne(dbWrk.lirePersonnes());
+            afficherPersonne(manPers.debutPersonne());
+
+        } catch (MyDBException ex) {
+            Logger.getLogger(MainCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
@@ -139,11 +156,48 @@ public class MainCtrl implements Initializable {
 
     @FXML
     private void annulerPersonne(ActionEvent event) {
+        rendreVisibleBoutonsDepl(true);
     }
 
     @FXML
-    private void sauverPersonne(ActionEvent event) {
-
+    private void sauverPersonne() throws MyDBException {
+        if (modeAjout) {
+            try {
+                dbWrk.creer(
+                        new Personne(txtNom.getText(),
+                                txtPrenom.getText(),
+                                java.sql.Date.valueOf(dateNaissance.getValue()),
+                                Integer.valueOf(txtNo.getText()),
+                                txtRue.getText(), Integer.valueOf(txtNPA.getText()),
+                                txtLocalite.getText(),
+                                ckbActif.isSelected(),
+                                Double.valueOf(txtSalaire.getText()),
+                                new java.util.Date()));
+            } catch (MyDBException ex) {
+                Logger.getLogger(MainCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            try {
+                dbWrk.modifier(
+                        new Personne(Integer.valueOf(txtPK.getText()),txtNom.getText(),
+                                txtPrenom.getText(),
+                                java.sql.Date.valueOf(dateNaissance.getValue()),
+                                Integer.valueOf(txtNo.getText()),
+                                txtRue.getText(), Integer.valueOf(txtNPA.getText()),
+                                txtLocalite.getText(),
+                                ckbActif.isSelected(),
+                                Double.valueOf(txtSalaire.getText()),
+                                new java.util.Date()));
+            } catch (MyDBException ex) {
+                throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+            }
+        }
+        try {
+            manPers.setPersonne(dbWrk.lirePersonnes());
+        } catch (MyDBException ex) {
+            Logger.getLogger(MainCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        afficherPersonne(manPers.debutPersonne());
     }
 
     public void quitter() {
