@@ -146,7 +146,7 @@ public class MainCtrl implements Initializable {
             afficherPersonne(manPers.debutPersonne());
 
         } catch (MyDBException ex) {
-            Logger.getLogger(MainCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
         }
     }
 
@@ -160,7 +160,7 @@ public class MainCtrl implements Initializable {
     }
 
     @FXML
-    private void sauverPersonne() throws MyDBException {
+    private void sauverPersonne() {
         if (modeAjout) {
             try {
                 dbWrk.creer(
@@ -174,12 +174,12 @@ public class MainCtrl implements Initializable {
                                 Double.valueOf(txtSalaire.getText()),
                                 new java.util.Date()));
             } catch (MyDBException ex) {
-                Logger.getLogger(MainCtrl.class.getName()).log(Level.SEVERE, null, ex);
+                JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
             }
         } else {
             try {
                 dbWrk.modifier(
-                        new Personne(Integer.valueOf(txtPK.getText()),txtNom.getText(),
+                        new Personne(Integer.valueOf(txtPK.getText()), txtNom.getText(),
                                 txtPrenom.getText(),
                                 java.sql.Date.valueOf(dateNaissance.getValue()),
                                 Integer.valueOf(txtNo.getText()),
@@ -189,15 +189,15 @@ public class MainCtrl implements Initializable {
                                 Double.valueOf(txtSalaire.getText()),
                                 new java.util.Date()));
             } catch (MyDBException ex) {
-                throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+                JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
             }
         }
         try {
             manPers.setPersonne(dbWrk.lirePersonnes());
         } catch (MyDBException ex) {
-            Logger.getLogger(MainCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
         }
-        afficherPersonne(manPers.debutPersonne());
+        afficherPersonne(manPers.courantPersonne());
     }
 
     public void quitter() {

@@ -2,6 +2,7 @@ package app.workers;
 
 import app.beans.Personne;
 import app.exceptions.MyDBException;
+import app.helpers.JfxPopup;
 import app.helpers.SystemLib;
 import java.sql.*;
 import java.util.ArrayList;
@@ -73,26 +74,28 @@ public class DbWorker implements DbWorkerItf {
         ArrayList<Personne> listePersonnes = new ArrayList<>();
         try {
             Statement st = dbConnexion.createStatement();
-            ResultSet rs = st.executeQuery("select PK_PERS, Prenom, Nom, Date_naissance, No_rue, Rue, NPA, Ville, Actif, Salaire, date_modif from t_personne");
-            while (rs.next()) {
-                int pk_pers = rs.getInt("PK_PERS");
-                String nom = rs.getString("Nom");
-                String prenom = rs.getString("Prenom");
-                Date date_naissance = rs.getDate("Date_naissance");
-                int no_rue = rs.getInt("No_rue");
-                String rue = rs.getString("Rue");
-                int npa = rs.getInt("NPA");
-                String ville = rs.getString("Ville");
-                boolean actif = rs.getByte("Actif") == 1;
-                double salaire = rs.getDouble("Salaire");
-                try {
-                    java.util.Date date_modif = new java.util.Date(rs.getDate("date_modif").getTime());
-                    listePersonnes.add(new Personne(pk_pers, nom, prenom, date_naissance, no_rue, rue, npa, ville, actif, salaire, date_modif));
-                } catch (Exception e) {
-                }
+            ResultSet rs = st.executeQuery("SELECT PK_PERS, Prenom, Nom, Date_naissance, No_rue, Rue, NPA, Ville, Actif, Salaire, date_modif, no_modif from t_personne");
 
+            while (rs.next()) {
+                try {
+                    int pk = rs.getInt("PK_PERS");
+                    String prenom = rs.getString("Prenom");
+                    String nom = rs.getString("Nom");
+                    java.util.Date dateNaissance = rs.getDate("Date_naissance");
+                    int noRue = rs.getInt("No_rue");
+                    String rue = rs.getString("Rue");
+                    int NPA = rs.getInt("NPA");
+                    String ville = rs.getString("Ville");
+                    boolean actif = rs.getByte("Actif") == 1;
+                    Double salaire = rs.getDouble("Salaire");
+                    java.util.Date dateModif = new java.util.Date(rs.getDate("date_modif").getTime());
+                    listePersonnes.add(new Personne(pk, nom, prenom, dateNaissance, noRue, rue, NPA, ville, actif, salaire, dateModif));
+                } catch (SQLException ex) {
+                    throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+                }
             }
         } catch (SQLException ex) {
+            throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
         }
         return listePersonnes;
     }
@@ -114,11 +117,13 @@ public class DbWorker implements DbWorkerItf {
                 st.setTimestamp(10, new Timestamp(p.getDateModif().getTime()));
                 int nb = st.executeUpdate();
                 if (nb != 1) {
-                    System.out.println("erreur d'ajout");
+                    throw new MyDBException(SystemLib.getFullMethodName(), "Erreur d'ajout");
                 } else {
                     System.out.println("ajout effectué");
                 }
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+
             }
         }
 
@@ -131,11 +136,13 @@ public class DbWorker implements DbWorkerItf {
                 PreparedStatement st = dbConnexion.prepareStatement("DELETE FROM t_personne WHERE PK_PERS=" + p.getPkPers());
                 int nb = st.executeUpdate();
                 if (nb != 1) {
-                    System.out.println("erreur de suppression");
+                    throw new MyDBException(SystemLib.getFullMethodName(), "Erreur de suppression");
                 } else {
                     System.out.println("suppression effectué");
                 }
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+
             }
         }
 
@@ -160,11 +167,13 @@ public class DbWorker implements DbWorkerItf {
                 st.setInt(11, p.getPkPers());
                 int nb = st.executeUpdate();
                 if (nb != 1) {
-                    System.out.println("erreur de mise à jour");
+                    throw new MyDBException(SystemLib.getFullMethodName(), "Erreur de mise à jour");
                 } else {
                     System.out.println("mise à jour effectué");
                 }
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+
             }
         }
 
@@ -172,7 +181,31 @@ public class DbWorker implements DbWorkerItf {
 
     @Override
     public Personne lire(int PK) throws MyDBException {
-        return null;
+        Personne p1 = null;
+        try {
+            Statement st = dbConnexion.createStatement();
+            ResultSet rs = st.executeQuery("select PK_PERS, Prenom, Nom, Date_naissance, No_rue, Rue, NPA, Ville, Actif, Salaire, date_modif from t_personne WHERE PK_PERS=" + PK);
+            while (rs.next()) {
+                int pk_pers = rs.getInt("PK_PERS");
+                String nom = rs.getString("Nom");
+                String prenom = rs.getString("Prenom");
+                Date date_naissance = rs.getDate("Date_naissance");
+                int no_rue = rs.getInt("No_rue");
+                String rue = rs.getString("Rue");
+                int npa = rs.getInt("NPA");
+                String ville = rs.getString("Ville");
+                boolean actif = rs.getByte("Actif") == 1;
+                double salaire = rs.getDouble("Salaire");
+                try {
+                    java.util.Date date_modif = new java.util.Date(rs.getDate("date_modif").getTime());
+                    p1 = new Personne(pk_pers, nom, prenom, date_naissance, no_rue, rue, npa, ville, actif, salaire, date_modif);
+                } catch (Exception ex) {
+                    throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+                }
+            }
+        } catch (SQLException ex) {
+        }
+        return p1;
     }
 
 }
